@@ -1,21 +1,18 @@
-import { useAppStore } from "@/lib/store";
 import { Card, CardContent } from "@/components/ui/card";
 import { School, Users, ClipboardCheck, Armchair } from "lucide-react";
 import { motion } from "framer-motion";
+import { useDashboardStats } from "@/lib/dashboard.api";
 
 export default function Dashboard() {
-  const { classrooms, students, attendance } = useAppStore();
-  const today = new Date().toISOString().split("T")[0];
-  const todayRecords = attendance.filter((a) => a.date === today);
-  const presentToday = todayRecords.filter((a) => a.status === "present").length;
-  const totalCapacity = classrooms.reduce((s, c) => s + c.capacity, 0);
-  const availableSeats = totalCapacity - presentToday;
+  const { data, isLoading } = useDashboardStats();
+
+  if (isLoading) return <div className="p-6">Loading...</div>;
 
   const metrics = [
-    { label: "Total Classrooms", value: classrooms.length, icon: School, color: "text-primary" },
-    { label: "Total Students", value: students.length, icon: Users, color: "text-secondary" },
-    { label: "Today's Occupancy", value: presentToday, icon: ClipboardCheck, color: "text-primary" },
-    { label: "Available Seats", value: availableSeats, icon: Armchair, color: "text-secondary" },
+    { label: "Total Classrooms", value: data?.classroomsCount ?? 0, icon: School, color: "text-primary" },
+    { label: "Total Students", value: data?.studentsCount ?? 0, icon: Users, color: "text-secondary" },
+    { label: "Today's Occupancy", value: data?.presentToday ?? 0, icon: ClipboardCheck, color: "text-primary" },
+    { label: "Available Seats", value: data?.availableSeats ?? 0, icon: Armchair, color: "text-secondary" },
   ];
 
   return (

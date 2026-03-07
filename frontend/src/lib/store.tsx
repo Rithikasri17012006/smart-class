@@ -8,9 +8,8 @@ interface AppState {
   classrooms: Classroom[];
   students: Student[];
   attendance: AttendanceRecord[];
-  isLoggedIn: boolean;
-  login: () => void;
-  logout: () => void;
+ 
+
   addClassroom: (c: Omit<Classroom, "id">) => void;
   updateClassroom: (c: Classroom) => void;
   deleteClassroom: (id: string) => void;
@@ -29,10 +28,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [classrooms, setClassrooms] = useState<Classroom[]>(initialClassrooms);
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const login = useCallback(() => setIsLoggedIn(true), []);
-  const logout = useCallback(() => setIsLoggedIn(false), []);
+ 
 
   const addClassroom = useCallback((c: Omit<Classroom, "id">) => {
     setClassrooms((prev) => [...prev, { ...c, id: genId("c") }]);
@@ -65,8 +61,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider
       value={{
-        classrooms, students, attendance, isLoggedIn,
-        login, logout,
+        classrooms, students, attendance, 
         addClassroom, updateClassroom, deleteClassroom,
         addStudent, updateStudent, deleteStudent,
         saveAttendance,

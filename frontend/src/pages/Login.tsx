@@ -1,23 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppStore } from "@/lib/store";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { School } from "lucide-react";
 import { motion } from "framer-motion";
+import { loginUser } from "@/lib/auth.api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAppStore();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    navigate("/dashboard");
+
+    try {
+      setLoading(true);
+
+      const data = await loginUser({ email, password });
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      alert(error?.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,8 +46,11 @@ export default function Login() {
               <School className="h-7 w-7 text-primary-foreground" />
             </div>
             <CardTitle className="text-2xl font-bold">SmartClass</CardTitle>
-            <CardDescription>Sign in to manage classrooms & attendance</CardDescription>
+            <CardDescription>
+              Sign in to manage classrooms & attendance
+            </CardDescription>
           </CardHeader>
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -42,12 +58,13 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@university.edu"
+                  placeholder="admin@smartclass.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
@@ -59,8 +76,9 @@ export default function Login() {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" size="lg">
-                Sign In
+
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
           </CardContent>

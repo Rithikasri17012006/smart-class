@@ -1,55 +1,32 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AppProvider, useAppStore } from "@/lib/store";
-import { AppLayout } from "@/components/AppLayout";
-import Login from "@/pages/Login";
-import Dashboard from "@/pages/Dashboard";
-import Classrooms from "@/pages/Classrooms";
-import Students from "@/pages/Students";
-import Attendance from "@/pages/Attendance";
-import AttendanceHistory from "@/pages/AttendanceHistory";
-import NotFound from "@/pages/NotFound";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Students from "./pages/Students";
+import Classrooms from "./pages/Classrooms";
+import Attendance from "./pages/Attendance";
+import AttendanceHistory from "./pages/AttendanceHistory";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
 
-const queryClient = new QueryClient();
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAppStore();
-  if (!isLoggedIn) return <Navigate to="/" replace />;
-  return <>{children}</>;
-}
-
-function AppRoutes() {
-  const { isLoggedIn } = useAppStore();
+export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/classrooms" element={<Classrooms />} />
-        <Route path="/students" element={<Students />} />
-        <Route path="/attendance" element={<Attendance />} />
-        <Route path="/history" element={<AttendanceHistory />} />
-      </Route>
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/students" element={<Students />} />
+            <Route path="/classrooms" element={<Classrooms />} />
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/history" element={<AttendanceHistory />} />
+          </Route>
+        </Route>
+
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AppProvider>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </AppProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
-
-export default App;
